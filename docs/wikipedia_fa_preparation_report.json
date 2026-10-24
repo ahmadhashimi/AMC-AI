@@ -1,0 +1,14 @@
+{
+  "source": "data/raw/wikipedia_fa/articles.jsonl",
+  "source_articles": 979869,
+  "unique_articles": 979741,
+  "counts": {
+    "train": 960149,
+    "val": 9779,
+    "test": 9813,
+    "duplicates_removed": 128
+  },
+  "normalization": "NFC Unicode normalization and outer whitespace trimming",
+  "deduplication": "Exact normalized text only; near duplicates not checked",
+  "split_method": "SHA-256 of normalized article text; approximately 98/1/1"
+}

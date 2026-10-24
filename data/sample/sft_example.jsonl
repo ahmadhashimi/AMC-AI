@@ -1,0 +1,2 @@
+{"instruction":"آب در چند درجه به جوش می‌آید؟","input":"فشار هوای معیاری در سطح بحر","output":"آب خالص در فشار معیاری جو تقریباً در ۱۰۰ درجه سانتی‌گراد به جوش می‌آید. در ارتفاعات، نقطهٔ جوش پایین‌تر است.","source":"AMC-authored illustration","verified":false}
+{"instruction":"Explain a gradient in machine learning in one sentence.","input":"","output":"A gradient describes how a model's loss changes as its parameters change, helping an optimizer choose weight updates.","source":"AMC-authored illustration","verified":false}

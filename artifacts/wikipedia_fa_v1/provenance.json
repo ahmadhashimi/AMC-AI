@@ -1,0 +1,27 @@
+{
+  "dataset": "wikimedia/wikipedia",
+  "config": "20231101.fa",
+  "training_split": "data/processed/wikipedia_fa_v1/train.jsonl",
+  "training_articles": 960149,
+  "vocab_size": 8192,
+  "tokenizer_sha256": "c626eff71a6e14d015fe8cc3ed4a085818201d6701aadf7e8e0228b67776395c",
+  "tokenizers_version": "0.23.3",
+  "datasets_version": "5.1.0",
+  "settings": {
+    "algorithm": "ByteLevel BPE",
+    "min_frequency": 2,
+    "special_tokens": [
+      "<unk>",
+      "<eos>",
+      "<pad>"
+    ],
+    "initial_alphabet": "all 256 bytes",
+    "add_prefix_space": false
+  },
+  "source_dataset_card": "https://huggingface.co/datasets/wikimedia/wikipedia",
+  "source_card_licenses": [
+    "cc-by-sa-3.0",
+    "gfdl"
+  ],
+  "model_pretraining_status": "not started on Wikipedia"
+}

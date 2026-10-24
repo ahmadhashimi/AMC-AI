@@ -1,0 +1,2 @@
+این متن تنها برای آزمایش روند آموزش مدل در نظر گرفته شده است.
+A tiny model with tiny data should not be expected to answer real questions accurately.

@@ -1,0 +1,1 @@
+Add legally authorized source PDFs here. This directory is gitignored. Never upload confidential student information. Use a manifest to track who owns each textbook and what training uses are allowed.

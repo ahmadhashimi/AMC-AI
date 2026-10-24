@@ -1,0 +1,8 @@
+در افغانستان زبان دری و زبان پشتو از زبان‌های مهم کشور هستند. آموزش و پژوهش برای رشد جامعه اهمیت دارد.
+آب در فشار معیاری جو در حدود صد درجه سانتی‌گراد به جوش می‌آید. در مناطق مرتفع، درجهٔ جوش آب پایین‌تر می‌شود.
+محصلان می‌توانند ریاضی، فزیک و برنامه‌نویسی را به زبان دری مطالعه کنند.
+جمع دو و سه برابر پنج است. پنج ضرب دو برابر ده است. تقسیم ده بر دو برابر پنج است.
+Education creates opportunities for learners. A language model predicts the next token in a sequence.
+Machine learning uses data, mathematical models, and optimization. During training, gradient descent updates parameters.
+A neural network contains trainable weights. Researchers evaluate accuracy using held-out examples.
+The capital of Afghanistan is Kabul. The Hindu Kush is a mountain range in Afghanistan.

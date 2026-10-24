@@ -1,0 +1,2 @@
+در آموزش علوم، آزمایش و پرسش اهمیت دارند. محصلان باید پاسخ‌ها را بررسی کنند.
+An evaluation dataset measures generalization. Training examples and test examples should be separate.
