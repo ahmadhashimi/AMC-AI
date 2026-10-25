@@ -1,0 +1,49 @@
+{
+  "created": "2026-10-24",
+  "seed": 20261024,
+  "sets": {
+    "dari_heldout": {
+      "rows": 44,
+      "characters": 25301,
+      "sha256": "b5e756836be451484ae101dc43e369f4e3cf0d824a5c807a1614c4827f7005aa",
+      "status": "sealed"
+    },
+    "science_heldout": {
+      "rows": 387,
+      "characters": 316414,
+      "sha256": "ac6e499870a33ba82200403efac2bd7d405a255aa1fdf539d557fa4d8bcfd942",
+      "status": "sealed"
+    },
+    "pashto_heldout": {
+      "rows": 147,
+      "characters": 369402,
+      "sha256": "6f4a6abf3b8766fd3d9006cb700e764a23dec1361ee893126d1679b8e7488c23",
+      "status": "sealed"
+    },
+    "math_probes": {
+      "rows": 200,
+      "characters": 0,
+      "sha256": "f7740b7ad32076c55ee983f5f62828ad54b61f7e2a2267b3ac26b34b4eb42e21",
+      "status": "sealed"
+    },
+    "english_heldout": {
+      "rows": 0,
+      "characters": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "EMPTY — not available"
+    }
+  },
+  "provenance": {
+    "held_out_books": [
+      "G1-Dr-Dari.pdf",
+      "G2-Dr-Dari_compressed.pdf",
+      "G5-Dr-Science.pdf",
+      "G5-Dr-Social_Science.pdf",
+      "G6-Dr-Science.pdf",
+      "G6-Dr-Social_Science_2.pdf"
+    ]
+  },
+  "sealed": true,
+  "rules": "These files are evaluation only. Any training corpus must exclude every book listed in provenance.held_out_books and must not contain these Pashto articles.",
+  "limitations": "english_heldout is empty: no English corpus is held locally. Math probes are synthetic arithmetic, not curriculum word problems. Pashto is encyclopedic Wikipedia, not Afghan classroom Pashto."
+}

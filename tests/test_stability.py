@@ -95,3 +95,25 @@ class StabilityChecks(unittest.TestCase):
 
 
 if __name__=='__main__':unittest.main()
+
+
+class BudgetChecks(unittest.TestCase):
+    def test_budget_stops_and_survives_resume(self):
+        from amc_model.budget import BudgetGuard, BudgetExceeded
+        with tempfile.TemporaryDirectory() as folder:
+            g = BudgetGuard(folder, limit_usd=1.0, rate_per_hour=3600.0)  # $1 per second
+            g.previous_hours = 0.0
+            self.assertGreater(g.check(), 0)
+            g.previous_hours = 10.0 / 3600                                 # 10 seconds billed
+            with self.assertRaises(BudgetExceeded):
+                g.check()
+            g.save()
+            again = BudgetGuard(folder, limit_usd=1.0, rate_per_hour=3600.0)
+            self.assertGreaterEqual(again.previous_hours, 10.0 / 3600)     # carried forward
+    def test_repeated_failures_stop_the_run(self):
+        from amc_model.budget import BudgetGuard, BudgetExceeded
+        with tempfile.TemporaryDirectory() as folder:
+            g = BudgetGuard(folder, limit_usd=1000.0, rate_per_hour=0.22, max_failures=2)
+            g.record_failure(); g.record_failure()
+            with self.assertRaises(BudgetExceeded):
+                g.check()

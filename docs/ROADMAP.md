@@ -1,3 +1,21 @@
+# AMC roadmap
+
+## Core objective added 2026-10-24: cross-language knowledge transfer
+
+AMC learns technical knowledge (programming, mathematics, physics, chemistry, biology, general
+knowledge) from high-quality **English** sources and learns to explain it naturally in **Afghan Dari**
+and **Pashto**. This is a first-class training objective, planned from the tokenizer upward.
+
+It does **not** change the from-scratch requirement: transfer comes from the data mixture, not from
+pretrained weights. Random initialisation stands.
+
+Full plan, datasets, evaluation design and risks: **`docs/CROSS_LANGUAGE_TRANSFER.md`**.
+
+Headline metric: `transfer_gap = accuracy(English question) − accuracy(Dari question)`, reported
+alongside factual correctness and language quality as three separate scores.
+
+---
+
 # AMC research roadmap and definition of success
 
 ## Step 0: Make every experiment reproducible

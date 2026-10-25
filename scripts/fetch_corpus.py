@@ -11,19 +11,22 @@ ROOT = Path(__file__).resolve().parents[1]
 # Source, config, split, text field, document cap, language tag. Caps keep a pod
 # run bounded; docs/CORPUS_MANIFEST.md carries the sizes and licences.
 SOURCES = {
-    'tinystories_en': ('roneneldan/TinyStories', None, 'train', 'text', 600_000, 'en'),
-    'tinystories_fa': ('taesiri/TinyStories-Farsi', None, 'train', None, 152_000, 'fa'),
+    # Real corpora only: no synthetic or machine-translated text. Register comes
+    # from editorial filtering (fineweb-edu) and real school books, not from
+    # generated stories. Caps keep a pod run bounded; sizes and licences are in
+    # docs/CORPUS_MANIFEST.md.
+    'fineweb_edu': ('HuggingFaceFW/fineweb-edu', 'sample-10BT', 'train', 'text', 400_000, 'en'),
     'pashto_web': ('HuggingFaceFW/fineweb-2', 'pbt_Arab', 'train', 'text', 400_000, 'ps'),
-    'persian_web': ('HuggingFaceFW/fineweb-2', 'fas_Arab', 'train', 'text', 300_000, 'fa'),
+    'persian_web': ('HuggingFaceFW/fineweb-2', 'fas_Arab', 'train', 'text', 400_000, 'fa'),
     'wikipedia_ps': ('wikimedia/wikipedia', '20231101.ps', 'train', 'text', 0, 'ps'),
-    'cosmopedia_stories': ('HuggingFaceTB/cosmopedia', 'stories', 'train', 'text', 200_000, 'en'),
+    'wikipedia_fa': ('wikimedia/wikipedia', '20231101.fa', 'train', 'text', 250_000, 'fa'),
 }
 
 
 def text_of(row, field):
     if field and field in row:
         return row[field]
-    for candidate in ('text', 'story', 'content', 'article'):  # schemas differ per dataset
+    for candidate in ('text', 'story', 'content', 'article', 'Persian'):  # schemas differ per dataset
         if candidate in row and isinstance(row[candidate], str):
             return row[candidate]
     raise KeyError(f'No text field in row with keys {list(row)}')
@@ -34,11 +37,13 @@ def main():
     p.add_argument('--out-dir', type=Path, default=ROOT / 'data/raw/corpus_v1')
     p.add_argument('--only', nargs='*', choices=sorted(SOURCES), help='Fetch a subset')
     p.add_argument('--reserve-gb', type=float, default=5.0)
+    p.add_argument('--cap', type=int, help='Override every per-source document cap (for smoke tests)')
     args = p.parse_args()
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     for name in (args.only or sorted(SOURCES)):
         repo, config, split, field, cap, language = SOURCES[name]
+        cap = args.cap or cap
         target = args.out_dir / f'{name}.jsonl'
         if target.exists():
             print(f'{name}: already present, skipping')

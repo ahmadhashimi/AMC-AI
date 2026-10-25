@@ -21,3 +21,7 @@ data/tokenized/
 *.safetensors
 .env
 .env.*
+
+# Evaluation sets contain Ministry textbook text: keep the manifest (hashes only), not the text.
+data/eval/*
+!data/eval/manifest.json

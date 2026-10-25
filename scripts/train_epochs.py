@@ -7,6 +7,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import shutil
 import signal
 import sys
 import time
@@ -20,6 +21,7 @@ from amc_model.token_data import EpochBatches, load_token_files
 from amc_model.monitoring import RunMonitor
 from amc_model.run_lock import RunLock
 from amc_model.schedule import learning_rate_at
+from amc_model.budget import BudgetGuard, BudgetExceeded
 
 # Values that reproduce the behaviour of runs started before these knobs
 # existed. Only a changed value joins the resume identity, so those runs
@@ -73,6 +75,8 @@ def main():
     p.add_argument("--out-dir", type=Path, default=ROOT / "outputs/wikipedia_v4_epochs")
     p.add_argument("--resume", action="store_true", help="Resume out-dir/last.pt, including optimizer and cursor")
     p.add_argument("--check-only", action="store_true")
+    p.add_argument("--budget-usd", type=float, help="Hard spend ceiling; the run stops and saves when reached")
+    p.add_argument("--gpu-rate", type=float, default=0.22, help="Hourly GPU price used for budget accounting")
     p.add_argument("--device", choices=("auto", "cpu", "cuda", "mps"), default="auto")
     args = p.parse_args()
     if min(args.epochs, args.batch_size, args.block_size, args.save_every) < 1 or not math.isfinite(args.lr) or args.lr <= 0:
@@ -142,6 +146,10 @@ def main():
         return
     args.out_dir.mkdir(parents=True, exist_ok=True)
     run_lock = RunLock(args.out_dir)
+    budget = BudgetGuard(args.out_dir, args.budget_usd, args.gpu_rate) if args.budget_usd else None
+    if budget:
+        print(f"Budget: ${budget.spent_usd:.2f} already billed of ${budget.limit_usd:.2f} "
+              f"at ${args.gpu_rate}/hour", flush=True)
     atexit.register(run_lock.close)
     stop = False
     monitor = RunMonitor(args.out_dir, {
@@ -154,6 +162,7 @@ def main():
         "weight_decay": args.weight_decay, "amp": args.amp,
         "tokenizer_vocab": tokenizer.vocab_size,
     })
+    best_validation = float('inf')   # keep the best checkpoint, not just the newest
     last_saved_step = step if args.resume else None
     last_saved_time = checkpoint.stat().st_mtime if args.resume else None
     train_loss = val_loss = rate = None
@@ -235,7 +244,22 @@ def main():
                 val = evaluate(model, data["val"], args.block_size, args.batch_size, device, amp)
                 val_loss = val
                 emit("validation")
-                tqdm.write(f"Saved step {step:,}; sampled validation loss={val:.4f}")
+                note = ""
+                if val < best_validation:
+                    best_validation = val
+                    shutil.copyfile(checkpoint, args.out_dir / "best.pt")
+                    note = "  <- best so far, kept as best.pt"
+                tqdm.write(f"Saved step {step:,}; sampled validation loss={val:.4f}{note}")
+            if budget and step % args.save_every == 0:
+                budget.save()
+                try:
+                    budget.check()
+                except BudgetExceeded as limit:
+                    save()
+                    emit("stopped", "paused")
+                    bar.close()
+                    print(f"\n{limit}. Checkpoint saved; resume with --resume and a higher --budget-usd.")
+                    return
             if stop:
                 save()
                 emit("stopped", "paused")
