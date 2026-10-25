@@ -1,7 +1,8 @@
 # AMC — Technical Handoff
 
 Prepared 2026-10-24 for a second technical advisor (ChatGPT / Codex) joining the project.
-Revision 2 — adds the evaluation and financial safety system built after revision 1.
+Revision 3 — adds the Afghan-domain measurement and the cross-language knowledge transfer objective.
+Revision 2 added the evaluation and financial safety system.
 Status labels used throughout: **[IMPLEMENTED]** code exists and has been run, **[TESTED]** verified with
 an explicit check or measurement, **[PLANNED]** decided but not built, **[NOT STARTED]**, **[UNKNOWN]**.
 
@@ -118,6 +119,54 @@ Books excluded from every future training corpus: `G1-Dr-Dari.pdf`, `G2-Dr-Dari_
 30 minutes, first checkpoint evaluation, run completion), with numeric thresholds. Headline gate for scaling:
 Dari perplexity < 100, real-word rate ≥ 95%, **Afghan dialect share > 0.90**, no flagged regression, and a
 native-speaker rubric mean ≥ 2.5 with neither *Afghan register* nor *Factual honesty* below 2.0.
+
+### [TESTED] Afghan-domain measurement — revision 3, the project's most consequential result
+
+`scripts/research_af_domains.py`, one streaming pass over **30,000 FineWeb-2 `fas_Arab` documents**
+(`docs/research_af_domains.json`):
+
+| Measurement | Result |
+| --- | --- |
+| `.af` TLD documents | 21 of 30,000 — **0.07%** |
+| **Named Afghan publishers on other TLDs** | **63 — three times more than `.af`** |
+| Afghan documents total | 84 of 30,000 — **0.28%** |
+| Afghan character share | 0.23% |
+| Dialect of the Afghan sample | **83.3% Afghan** (5 Afghan vs 1 Iranian markers, 3,611 chars) |
+| **Linear projection to the full 58,887,122-document subset** | **≈165,000 documents ≈ 165M tokens** |
+
+Afghan publishers found outside `.af`: `da.azadiradio.com` (36), `bbc.com`, `avapress.com`,
+`afghanpaper.com`, `pajhwok.com`, `ariananews.co`, `khaama.com`, `etilaatroz.com`, `jomhornews.com`,
+`afghanembassy.net`, `dw.com`. Inside `.af`: `tkg.af`, `president.gov.af`, `mod.gov.af`, `mohe.gov.af`,
+`supremecourt.gov.af`, `bakhtarnews.com.af`, `aihrc.org.af`.
+
+**Why this matters.** The obvious approach — filter on the `.af` TLD — returns 21 documents and would lead
+an engineer to conclude Afghan web text does not exist. **Three quarters of Afghan content is on `.com`.**
+
+**What it changes.** Afghan share of a hypothetical 6B-token corpus moves from 0.015% (curriculum only) to
+**2.75%** at 1×, or **≈11%** at the 4× repetition that is standard practice. The step-94,000 model that
+produced Iranian output trained on roughly 0.4% Afghan content.
+
+**Confidence — read this before quoting the number.** The projection rests on **84 Afghan documents** from a
+single **unshuffled** pass over the head of one config. The named-publisher list is hand-collected and
+certainly incomplete, so the true yield is likely higher, but the sampling error on 84 documents is wide.
+**This figure is provisional and should be superseded by a 200k–500k document rerun**, not quoted as settled.
+
+Domain is also only a proxy for dialect: an `.af` site may publish Iranian Persian, and an Afghan author may
+publish on a `.com`. The 83.3% dialect score on the selected sample supports the proxy but rests on 3,611
+characters.
+
+### [PLANNED] Cross-language knowledge transfer — core objective, added revision 3
+
+Full plan in `docs/CROSS_LANGUAGE_TRANSFER.md`. AMC is to learn technical knowledge from English sources and
+express it in Dari and Pashto. **This does not change the from-scratch requirement** — transfer is a property
+of the data mixture, not of initialisation.
+
+Headline metric: `transfer_gap = accuracy(English question) − accuracy(Dari question)`, reported beside
+factual correctness and language quality as three separate scores.
+
+**Scale caveat recorded in the plan:** cross-lingual transfer is weak below roughly 1B parameters, so the
+30M pilot tests the pipeline and cannot demonstrate this objective. The required held-out sets
+(`transfer_qa_dari`, `transfer_qa_pashto`, `transfer_qa_english`, `terminology_probe`) are **NOT BUILT**.
 
 ---
 
@@ -247,7 +296,12 @@ rate, dialect Afghan share, and generations from 5 fixed prompts. `scripts/eval_
 
 ## 8. Current problems
 
-**P1 — The central contradiction. Afghan text does not exist at pretraining scale.**
+**P1 — [MATERIALLY IMPROVED in revision 3] Afghan text at pretraining scale.**
+The revision-3 measurement raises reachable Afghan text from 0.9M to an estimated **165M tokens**, which is
+enough for an Afghan-*sounding* model but still not enough for a from-scratch model that knows physics. The
+paragraph below describes the position before that measurement and remains true for the knowledge problem.
+
+**The original statement of the contradiction:**
 Measured: 0.70M Afghan tokens held. A 300M model needs ~6,000M tokens; even a 30M model needs ~600M.
 All large Persian corpora are **Iranian** (Wikipedia 6.9% Afghan by our own detector). Therefore any
 from-scratch model trained on available data will be an Iranian Persian model. This was demonstrated, not
@@ -300,10 +354,9 @@ ceiling of `--budget-usd 10` against the owner's stated $50 maximum. **It is not
 has been spent; total RunPod spend remains $0.00.**
 
 
-1. **Run the `.af` domain-filter experiment.** Stream a sample of FineWeb-2 `fas_Arab` and count documents
-   from Afghan domains. Free, ~10 minutes. **This single number determines whether P1 is solvable in weeks or
-   is fatal to the from-scratch goal.** It has been proposed repeatedly and never run — it is the highest
-   value-per-effort action available.
+1. **[DONE revision 3] The Afghan-domain experiment.** Result above: ≈165M tokens reachable, and a TLD-only
+   filter misses 75% of it. **Next action: rerun at 200k–500k documents to replace the provisional figure**,
+   and extend the named-publisher list, which is the main lever on yield.
 2. **Resolve P2 (page ordering)** by having a Dari reader confirm whether whole pages read correctly. If not,
    rebuild the dataset from sentences instead of pages.
 3. **Finish extracting the remaining 169 books** — free, unattended, resumable, triples the Afghan corpus.
@@ -325,24 +378,24 @@ has been spent; total RunPod spend remains $0.00.**
 3. **The dialect detector is the project's quality gate.** Any proposal must be evaluable by it. A model that
    scores below ~90% Afghan on `eval_dialect.py` has not met the project's purpose, regardless of its loss.
 
-4. **The valuable artifacts are the data and the tooling, not the model.** The extraction fixes (reversed
+5. **The valuable artifacts are the data and the tooling, not the model.** The extraction fixes (reversed
    reading order, zero-width-ALEF ligature) and the dialect detector are genuinely novel. The 1.66M model is
    a pipeline proof.
 
-5. **Honesty discipline is a project requirement**, encoded in `CLAUDE.md` and `docs/DATA_POLICY.md`:
+6. **Honesty discipline is a project requirement**, encoded in `CLAUDE.md` and `docs/DATA_POLICY.md`:
    every data artifact carries `approved_for_training: false` plus an explicit `limitations` string until a
    human gate passes; heuristic flags never constitute approval; falling loss is not coherence; no silent
    repair of text. Please preserve these conventions.
 
-6. **Verify before asserting.** Commands: `.venv/bin/python -m unittest discover -s tests -v`,
+7. **Verify before asserting.** Commands: `.venv/bin/python -m unittest discover -s tests -v`,
    `node tests/test_assessment.cjs`, `.venv/bin/python -u scripts/verify_baseline.py`. Always run from the
    repository root with the explicit `.venv/bin/python` — the user's shell aliases `python`.
 
-7. **Never report a tier-4 claim from a tier-2 number.** The scorecard carries an explicit warning field for
+8. **Never report a tier-4 claim from a tier-2 number.** The scorecard carries an explicit warning field for
    this. "Loss went down" is tier 1 evidence that the optimiser works, nothing more. The project has a
    measured example of why: the step-94,000 model has respectable loss and generates Iranian text about
    Tehran with 0% arithmetic accuracy.
 
-8. **What is NOT known** and should not be guessed: whether `.af` content exists at scale in FineWeb-2;
+9. **What is NOT known** and should not be guessed: whether the 165M projection survives a larger sample;
    whether page-level line ordering is correct; how weights get off a RunPod pod; whether the Ministry will
    grant redistribution rights; what Qwen3-4B's baseline Dari ability is (never measured).
