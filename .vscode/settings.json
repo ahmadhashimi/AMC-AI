@@ -1,0 +1,6 @@
+{
+  "git.enabled": true,
+  "git.autorefresh": true,
+  "git.decorations.enabled": true,
+  "scm.diffDecorations": "all"
+}

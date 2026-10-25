@@ -1,0 +1,57 @@
+{
+  "tokenizer_sha256": "c626eff71a6e14d015fe8cc3ed4a085818201d6701aadf7e8e0228b67776395c",
+  "checkpoints": {
+    "wikipedia": {
+      "path": "outputs/wikipedia_baselines/step_48886.pt",
+      "sha256": "38efad735f76636f946493cb7ebb3f8f34ea2d3d9718f26988e21a6536aec83d",
+      "steps": 48886,
+      "parameters": 1660032,
+      "config": {
+        "vocab_size": 8192,
+        "context_length": 128,
+        "n_layers": 3,
+        "n_heads": 4,
+        "d_model": 128,
+        "dropout": 0.0
+      },
+      "known_control_exact_matches": null
+    },
+    "memorization": {
+      "path": "outputs/research/sanity_seed42/model.pt",
+      "sha256": "c8825c486130f20559c899ef47425289114265849dbdabe8a6dfedc5a08ab05c",
+      "steps": 500,
+      "parameters": 1660032,
+      "config": {
+        "vocab_size": 8192,
+        "context_length": 128,
+        "n_layers": 3,
+        "n_heads": 4,
+        "d_model": 128,
+        "dropout": 0.0
+      },
+      "known_control_exact_matches": 4
+    },
+    "generalization": {
+      "path": "outputs/research/context_seed42/model.pt",
+      "sha256": "a83d701d5d4e97404484b28f2f25b7ca7e43772461a4f0945c5690b3425ab023",
+      "steps": 1500,
+      "parameters": 1660032,
+      "config": {
+        "vocab_size": 8192,
+        "context_length": 128,
+        "n_layers": 3,
+        "n_heads": 4,
+        "d_model": 128,
+        "dropout": 0.0
+      },
+      "known_control_exact_matches": 48
+    }
+  },
+  "environment": {
+    "python": "3.14.7",
+    "torch": "2.14.1",
+    "numpy": "2.5.4",
+    "tokenizers": "0.23.3"
+  },
+  "scope": "Engineering and narrow control regressions only. No broad language-coherence, medical, voice, vision or MoE quality claim."
+}

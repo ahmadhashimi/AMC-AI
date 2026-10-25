@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AMC · Training observatory</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+<header><a class="brand" href="/" aria-label="AMC training home">AMC<span>Language research</span></a><div class="header-right"><span id="connection" role="status">Connecting…</span><a href="/api/export" download>Export measurements</a></div></header>
+<main>
+<section class="intro"><div><h1>Watch the learning.</h1><p>Your Wikipedia experiment, one dataset pass at a time.</p></div><div class="run-name">Persian Wikipedia <span>Clean v4 · From scratch</span></div></section>
+<div id="notice" class="notice" role="status">Reading your local training run…</div>
+<section id="health" class="health amber" role="status" aria-live="polite"><span class="health-dot" aria-hidden="true"></span><div><h2 id="health-title">Waiting for training</h2><p id="health-reason">Checking validation measurements…</p></div></section>
+<section class="progress-section" aria-label="Epoch progress"><div class="progress-top"><h2 id="epoch">Epoch —</h2><span id="percent">—</span></div><progress id="progress" max="100" value="0" aria-label="Epoch completion"></progress><div class="progress-bottom"><span id="steps">Waiting for measurements</span><span id="eta">Time remaining unavailable</span></div></section>
+<section class="workspace"><div class="chart-panel">
+<div class="chart-heading"><div><h2>Prediction loss</h2><p>Lower means better next-token prediction.</p></div><label>Show <select id="range"><option value="0">All measurements</option><option value="10000">Last 10,000 steps</option><option value="50000">Last 50,000 steps</option></select></label></div>
+<div class="legend"><label><input id="show-train" type="checkbox" checked><span class="swatch train"></span>Training batch</label><label><input id="show-val" type="checkbox" checked><span class="swatch val"></span>Validation sample</label><span>Hover or touch to inspect</span></div>
+<div id="chart-wrap"><svg id="chart" role="img" aria-label="Training and validation loss over optimizer steps"></svg><div id="chart-empty">Loss history will appear after the trainer starts recording measurements.</div><div id="tooltip" hidden></div></div>
+<div class="chart-foot"><span id="loss-trend">Waiting for validation measurements</span><span id="chart-count">0 measurements</span></div>
+<p class="explanation">Training loss is one batch. Validation uses the same sample of up to 20 batches each time. These numbers measure prediction, not factual accuracy or Dari fluency.</p>
+</div><aside>
+<section class="telemetry"><h2>Right now</h2><dl><div><dt>Training loss</dt><dd id="train-loss">—</dd></div><div><dt>Validation loss</dt><dd id="val-loss">—</dd></div><div><dt>Steps / second</dt><dd id="speed">—</dd></div><div><dt>Approx. tokens / second</dt><dd id="throughput">—</dd></div></dl></section>
+<section class="checkpoint"><h2>Saved progress</h2><strong id="saved-step">No checkpoint yet</strong><p id="saved-time">—</p><p id="unsaved">—</p></section>
+</aside></section>
+<section class="details"><div><h2>The experiment</h2><dl id="run-details"></dl></div><div class="events"><h2>Recent measurements</h2><div class="table-wrap"><table><thead><tr><th>Step</th><th>Event</th><th>Loss</th><th>Time</th></tr></thead><tbody id="event-body"><tr><td colspan="4">No recorded measurements yet.</td></tr></tbody></table></div></div></section>
+<details class="help"><summary>How to stop and resume safely</summary><p>In the training terminal, press Ctrl+C once and wait for “Stopped safely”. Keep the same settings and resume with:</p><pre><code>.venv/bin/python -u scripts/train_epochs.py --epochs 1 --resume</code></pre><p>This dashboard only reads measurements. Closing it does not stop your training. Checkpoints save every 1,000 steps by default.</p></details>
+<footer><span>AMC training observatory</span><span id="updated">Local measurements · Refreshes every 2 seconds</span></footer>
+</main><noscript>Enable JavaScript to view the live training measurements.</noscript><script src="/assessment.js"></script><script src="/app.js"></script>
+</body></html>

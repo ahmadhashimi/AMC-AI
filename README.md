@@ -6,6 +6,8 @@
 
 See [current progress and reproduction commands](docs/PROGRESS.md). The trained tokenizer is in `artifacts/wikipedia_fa_v1/tokenizer.json`; large datasets and model checkpoints are kept outside Git tracking.
 
+For full Wikipedia passes, checkpoint resume, and the local live dashboard, see [training monitoring](docs/TRAINING_MONITORING.md). Start the dashboard in a separate terminal with `.venv/bin/python -u scripts/training_dashboard.py`, then open `http://127.0.0.1:8765`. Runs started before the metrics update need one safe stop/resume to begin recording loss history.
+
 ## Why two tracks?
 
 1. **AMC Learning Lab (this repo):** a readable PyTorch decoder-only Transformer with its attention, embeddings, loss, backpropagation, checkpointing, generation, and inspectable gradients. Begin here.

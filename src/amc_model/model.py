@@ -37,12 +37,10 @@ class CausalSelfAttention(nn.Module):
         q = q.view(batch, seq, self.n_heads, self.head_dim).transpose(1, 2)
         k = k.view(batch, seq, self.n_heads, self.head_dim).transpose(1, 2)
         v = v.view(batch, seq, self.n_heads, self.head_dim).transpose(1, 2)
-        scores = (q @ k.transpose(-2, -1)) / math.sqrt(self.head_dim)
-        # Causal mask: a token cannot read future tokens.
-        future = torch.ones(seq, seq, device=x.device, dtype=torch.bool).triu(1)
-        scores = scores.masked_fill(future, torch.finfo(scores.dtype).min)
-        attention = F.softmax(scores, dim=-1)
-        out = attention @ v
+        # softmax(QK^T / sqrt(head_dim)) V with every future position masked,
+        # computed by the fused kernel. It never materialises the seq x seq
+        # score matrix, which is what makes a 512-token context affordable.
+        out = F.scaled_dot_product_attention(q, k, v, is_causal=True)
         out = out.transpose(1, 2).contiguous().view(batch, seq, d_model)
         return self.dropout(self.out(out))
 
@@ -77,6 +75,11 @@ class AMCTransformer(nn.Module):
         self.lm_head = nn.Linear(cfg.d_model, cfg.vocab_size, bias=False)
         self.lm_head.weight = self.token_embeddings.weight  # tied weights
         self.apply(self._init_weights)
+        # Shrink what each block adds to the residual stream, so a deeper stack
+        # does not start with a growing activation scale.
+        for name, parameter in self.named_parameters():
+            if name.endswith(("attention.out.weight", "mlp.2.weight")):
+                nn.init.normal_(parameter, mean=0.0, std=0.02 / math.sqrt(2 * cfg.n_layers))
 
     @staticmethod
     def _init_weights(module):
