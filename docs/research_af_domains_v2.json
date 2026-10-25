@@ -1,0 +1,166 @@
+{
+  "dataset": "HuggingFaceFW/fineweb-2",
+  "config": "fas_Arab",
+  "documents_scanned": 150000,
+  "seconds": 58.3,
+  "method": "Each document is classified into exactly one category by hostname (with label boundary) or by an Afghan-service path on a multi-service broadcaster. Near-duplicates sharing a host and opening 300 characters are counted separately and excluded from the character total.",
+  "af_tld_documents": 258,
+  "af_tld_share": 0.00172,
+  "named_host_documents": 328,
+  "named_path_documents": 36,
+  "afghan_documents_total": 622,
+  "afghan_share": 0.004147,
+  "near_duplicates_excluded": 9,
+  "unique_afghan_documents": 613,
+  "unique_afghan_share": 0.004087,
+  "afghan_characters": 1410330,
+  "other_characters": 504304076,
+  "afghan_character_share": 0.002789,
+  "top_tlds": {
+    "ir": 68871,
+    "com": 66925,
+    "net": 4920,
+    "org": 4525,
+    "info": 481,
+    "co": 444,
+    "news": 412,
+    "af": 258,
+    "site": 200,
+    "space": 157,
+    "in": 144,
+    "us": 143
+  },
+  "af_hosts": {
+    "tkg.af": 39,
+    "atlaspress.af": 36,
+    "rahapress.af": 28,
+    "ariananews.af": 16,
+    "dailies.gov.af": 10,
+    "www.aihrc.org.af": 7,
+    "bokhdinews.af": 6,
+    "kpu.edu.af": 6,
+    "km.gov.af": 5,
+    "8am.af": 5,
+    "sana.af": 5,
+    "president.gov.af": 4,
+    "www.football.af": 4,
+    "cafebazaar.af": 4,
+    "nai.org.af": 4,
+    "afjc.af": 4,
+    "hu.edu.af": 3,
+    "tebyan.af": 3,
+    "mod.gov.af": 2,
+    "www.mohe.gov.af": 2
+  },
+  "named_hosts": {
+    "da.azadiradio.com": 88,
+    "www.avapress.com": 38,
+    "ansarpress.com": 32,
+    "www.jomhornews.com": 28,
+    "www.afghanpaper.com": 26,
+    "afghanpaper.com": 26,
+    "avapress.com": 20,
+    "ariananews.co": 18,
+    "www.khaama.com": 10,
+    "www.etilaatroz.com": 9,
+    "www.tolonews.com": 8,
+    "tolonews.com": 5,
+    "prod.tolonews.com": 4,
+    "www.pajhwok.com": 3,
+    "subhekabul.com": 3,
+    "www.nunn.asia": 2,
+    "etilaatroz.com": 2,
+    "jomhornews.com": 1,
+    "afghanembassy.net": 1,
+    "govmeter.tolonews.com": 1
+  },
+  "named_paths": {
+    "www.dw.com": 36
+  },
+  "dialect_of_afghan_sample": {
+    "afghan_share": 1.0,
+    "afghan_markers": 5,
+    "iranian_markers": 0,
+    "sample_chars": 3611
+  },
+  "projection_full_subset": {
+    "note": "Linear projection of the measured unique share onto the full 58,887,122-document subset. The stream is not shuffled, so the head may not be representative.",
+    "projected_afghan_documents": 240652,
+    "projected_afghan_tokens_estimate": 167778333
+  },
+  "limitations": "Single unshuffled pass over the head of one config. Domain is a proxy for dialect: an .af site may publish Iranian Persian and an Afghan author may publish on a .com. The host list is hand-collected and not exhaustive, so the true yield is likely higher. bbc.com/persian is deliberately excluded as Iran-facing. No rights review performed.",
+  "samples": [
+    {
+      "url": "http://malumatmead.blog.af/2010/08/24/%D9%87%D8%B1%D8%A7%D8%AA-%D8%A8%D8%A7%D8%B3%D8%AA%D8%A7%D9%86/",
+      "category": "af_tld",
+      "chars": 19511,
+      "text": "هِرات دومین شهر بزرگ افغانستان و مرکز ولایت هرات است که قطب صنعتی افغانستان بشمار میآید. هریرود از کنار این شهر میگذرد. هرات با نفوس 349٫000 نفر (برآورد رسمی سال 2006)، دومین شهر پر نفوس افغانستان است. و همراه با کابل، قندهار ، مزار شریف وننگرهاریکی ازپنج شهر بزرگ افغانستان بهشمار میآید. باشندگان اص"
+    },
+    {
+      "url": "http://www.pajhwok.com/dr/2012/02/09/%D8%AA%DB%8C%D9%85-%D9%85%D9%84%DB%8C-%DA%A9%D8%B4%D9%88%D8%B1-%D8%AF%D8%B1-%D9%85%",
+      "category": "named_host",
+      "chars": 1929,
+      "text": "Lorem Ipsum is simply dummy text of the printing...\nورزش\nتیم ملی کشور در مقابل پاکستان ۱۹۵ دوش انجام دادBy پاينده حکمت Feb 9, 2012 - 13:28\nکابل ( پژواک ٢١ دلو ٩٠ ) : افغانستان در نخستين مسابقه بين المللى يک روزه خود با پاکستان که داراى عضويت کامل شوراى بين المللى کرکت است ۱۹۵ دوش انجام داد.\nقرعه اين"
+    },
+    {
+      "url": "http://www.avapress.com/vdcb0gba.rhb88piuur.html",
+      "category": "named_host",
+      "chars": 1905,
+      "text": "جبهه ملی افغانستان:\nمفاد موافقتنامه راهبردی زمانی در عمل تحقق خواهد یافت که باعث بهبود زنده گی مردم افغانستان گردد\nتاریخ انتشار : پنجشنبه ۱۴ ثور ۱۳۹۱ ساعت ۲۰:۳۸\nدر اعلامیه جبهه ملی افغانستان، عدم ذکر نام طالبان به عنوان منبع تهدید آن را یکی از کاستی های این موافقت نامه خوانده شده است.\nجبهه ملی افغان"
+    },
+    {
+      "url": "http://da.azadiradio.com/content/article/1866293.html",
+      "category": "named_host",
+      "chars": 1940,
+      "text": "برخی از اعضای مشرانو جرگه شورای ملی افغانستان می گویند که با فرستادن عساکر اضافی امریکایی به این کشور امنیت و ثبات در افغانستان برقرار شده نمی تواند.\nشماری از اعضای مشرانو جرگه به این باور اند که استفاده از راه نظامی به منظور آوردن صلح و ثبات در افغانستان نتیجه مثبت به دنبال نداشته و ایالات متحده با"
+    },
+    {
+      "url": "http://www.afghanpaper.com/nbody.php?id=50020",
+      "category": "named_host",
+      "chars": 14087,
+      "text": "\n\nملاعمر کاندید ریاست جمهوری شود!\n\n\nفارغ از همه تردیدها و نگرانی های دیگر، مشخص نیست که آمریکا در برابر این دعوت آقای کرزی که از سوی ملاعمر مورد قبول قرار گیرد، چه واکنشی نشان خواهد داد\n\n\nتاریخ انتشار:\n۲۲:۳۵ ۱۳۹۲/۱/۱۴\n\n\nکد خبر:\n50020\n\n\nمنبع:\n\n\nنسخه چاپی\n\n\nطالبان تا کنون به بهانه های گوناگون امتیازات"
+    },
+    {
+      "url": "http://president.gov.af/fa/page/1050",
+      "category": "af_tld",
+      "chars": 6489,
+      "text": "ارگ را در لغت به معنی قلعه ی کوچک درمیان قلعه بزرگ گویند که دارای برج و بار باشد. دراصطلاح به معنی اقامتگاه فرمانرواست لذا به مکانی اطلاق می شود که در آن فرمانروای شهر، ایالت و یا کشور اقامت داشته باشد و غالباً وی از آنجا مبادرت به اداره ی امور می کند. در گذ شته این مفهوم در افغانستان به دو مکان اطل"
+    },
+    {
+      "url": "http://www.afghanpaper.com/nbody.php?id=39904",
+      "category": "named_host",
+      "chars": 17983,
+      "text": "نظرات بینندگان:\n>>> دیروز و امروز جوانان چون بهاوی و نیکپا نشان دادن که افغان ها هم می توانند که در ردیف کشور های بزرگ افتخار آفرین برای کشور شان باشند . این را باید سیاست مداران ما بدانند که توجه نکردن به یک جوان چقدر صدمه بزرگی بر پیکریک کشور وارد می سازد همان طور یکه برایش افتخار می اورد .\nاما اف"
+    },
+    {
+      "url": "http://www.afghanpaper.com/info/velaiat/kondoz.htm",
+      "category": "named_host",
+      "chars": 956,
+      "text": "\n\nشبکه اطلاع رسانی افغانستان >>\nاطلاعات عمومی\nولایت کندوز\nولایت کُندوز یکی از ولایتهای شمال\nشرق افغانستان است. مرکز آن کندوز است که یکی از شهرهای مهم، تجارتی و بندری افغانستان است.\nولایت کندز با بیش از ۲۰۰ یا ۲۵۰ هزار نفر جمعیت دارد که تقریباً ۷۰ درصد آنها از دامداری و زراعت عاید معاش میکنند.\nاین ول"
+    },
+    {
+      "url": "http://mod.gov.af/fa/news/6610",
+      "category": "af_tld",
+      "chars": 1001,
+      "text": "ملاقات محترم وزیر دفاع ملی با همتای استرالیایی اش در قصر وزارت دفاع ملی\nتاریخ نشر: Jan 29, 2012\nستر جنرا ل عبدالرحیم \"وردک\"وزیردفاع ملی با \"ستیفن سمیت\" وزیردفاع استرالیا درحالیکه لوی درستیز آنکشور نیز ویرا همراهی میکرد درمقر وزارت دفاع ملی ملاقات کرد.\nانکشاف اردوی ملی ،انتقال مسئولیت امنیتی رئوس مطا"
+    },
+    {
+      "url": "http://tkg.af/dari/report/others/3589-%D8%A8%D9%86%D8%AF-%D8%A7%D9%85%DB%8C%D8%B1-%D8%AF%D8%B1-%D8%A8%D8%A7%D9%88%D8%B1-",
+      "category": "af_tld",
+      "chars": 10728,
+      "text": "کابل فردا آفتابی\nقندهار فردا آفتابی\nهرات فردا آفتابی\nمزارشريف فردا آفتابی\nغزنی فردا آفتابی\nجلال آباد فردا نسبتا ابری\nباميان فردا آفتابی\nزرنج فردا آفتابی\nميمنه فردا آفتابی\nتازه ها:\n- 50 طالب مسلح در ولایت فراه کشته و زخمی شدند\n- عبدالله بر شناسایی و بازداشت عاملان رویداد خونین اخیر در کابل تاکید کرد\n"
+    },
+    {
+      "url": "http://www.afghanpaper.com/nbody.php?id=20506",
+      "category": "named_host",
+      "chars": 55920,
+      "text": "\n\nتظاهرات ، همراه خشونت در کشور\n\n\nدر این حادثه که از قبل پیش بینی می شد و قابل پیشگیری بود ، 8 کارمند خارجی دفتر سازمان ملل متحد در مزار شریف به شمول یک خانم ، کشته شد و دو فرد خارجی نیز زخمی گردید\n\n\nتاریخ انتشار:\n۲۱:۲۹ ۱۳۹۰/۱/۱۲\n\n\nکد خبر:\n20506\n\n\nمنبع:\n\n\nنسخه چاپی\n\n\nبه گزارش شبکه اطلاع رسانی افغانس"
+    },
+    {
+      "url": "http://www.pajhwok.com/en/photo/135630",
+      "category": "named_host",
+      "chars": 860,
+      "text": "برادر يک ولسوال با هفت فرد ملکى ديگر مجروح شد\nترينکوت (پژواک،٢٦دلو ٨٩): برادر يک ولسوال و هفت فرد ملکى ديگر، در انفجار ماين کنار جاده در ولسوالى دهراود ولايت ارزگان، مجروح شدند.\nساتنمن ميرزاخان معاون قوماندانى امنيۀ ولسوالى دهراوود، به تاريخ ٢٦ دلو به آژانس خبرى پژواک گفت که اين انفجار، ظهر روز گذشت"
+    }
+  ]
+}

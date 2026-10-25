@@ -29,9 +29,13 @@ that, in increasing order of strength:
 3. **Task supervision** — question in Dari, answer in Dari, about English-sourced knowledge. This teaches the
    behaviour we want, rather than hoping it emerges.
 
-**Honest limitation:** cross-lingual transfer strengthens with scale. Published results show it is weak below
-roughly 1B parameters. At the planned 30M pilot, expect **little or no measurable transfer** — the pilot
-tests the pipeline, not this objective. Claiming transfer from a 30M run would be unsupportable.
+**Honest limitation — stated as a hypothesis, not a threshold.** Cross-lingual transfer is generally
+reported to strengthen with scale, and I would not expect much from a 30M model. **But "transfer needs ~1B
+parameters" is an unverified scaling hypothesis, not an established threshold** (correction accepted from the
+second advisor, 2026-10-25). No citation has been checked for this project, and small models remain useful
+experiments: a 30M run can still produce a *measured* transfer-gap number, which is more informative than an
+assumption either way. The correct posture is to measure the gap at every scale and let the data set
+expectations — not to skip the measurement because a rule of thumb says it will be zero.
 
 ## Datasets required — what we have and what we need
 
@@ -122,14 +126,15 @@ English 40%, Dari/Persian 35%, Pashto 20%, bilingual anchors 5%. The English sha
 earlier Dari-led mix in `docs/CORPUS_MANIFEST.md` **because knowledge now has to come from somewhere**, and
 that is a deliberate trade against Dari fluency.
 
-**Scale note:** this objective realistically needs ≥1B parameters to show measurable transfer. The staged
-plan is correct at any size, but the 30M and 300M runs should be reported as pipeline and language
-milestones, never as transfer results.
+**Scale note:** the staged plan is correct at any size. Report the 30M and 300M runs primarily as pipeline
+and language milestones, and report their transfer gap as a measurement with its sample size — not as a
+demonstration of the objective, and not as a foregone failure.
 
 ## Risks
 
 1. **Transfer may not appear at achievable scale.** Mitigation: measure the gap at every checkpoint; do not
-   promise the capability before it is measured.
+   promise the capability before it is measured. Equally, do not *assume* it is absent — the threshold at
+   which transfer emerges for this language pair is unknown to this project.
 2. **en↔ps parallel data may not exist** in useful quantity. Mitigation: survey OPUS before committing;
    if it is absent, Pashto transfer becomes a translation problem, not a pretraining one.
 3. **Q&A supervision must be human-verified**, which is slow and the main non-compute cost of this objective.

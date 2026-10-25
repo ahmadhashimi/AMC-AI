@@ -1,6 +1,7 @@
 """Measure how much of FineWeb-2 Persian comes from Afghan sources."""
 import argparse
 from collections import Counter
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -13,14 +14,48 @@ sys.path.insert(0, str(ROOT / 'scripts'))
 from datasets import load_dataset
 from eval_dialect import score as dialect_score
 
-# Afghan publishers that do NOT use a .af domain. Hand-collected; not exhaustive.
+# Afghan publishers that do not use a .af domain. Matched on the HOSTNAME with a
+# label boundary, never as a substring of the whole URL: "nn.af" inside a path or
+# "bbc.com" anywhere would otherwise produce false positives.
 AFGHAN_HOSTS = (
-    'pajhwok', 'tolonews', '8am.media', 'hasht-e-subh', 'azadiradio', 'avapress',
-    'khaama', 'ariananews', 'etilaatroz', 'salaamtimes', 'bakhtarnews', 'wadsam',
-    'afghanistantimes', 'afghanpaper', 'jomhornews', 'dw.com/fa-af', 'bbc.com/persian',
-    'rawa.org', 'afghan-bios', 'afghanembassy', 'afghanvoice', 'subhekabul',
-    'hashtesubh', 'rahapress', 'nn.af', 'ansarpress',
+    'pajhwok.com', 'tolonews.com', '8am.media', 'hasht-e-subh.com', 'hashtesubh.com',
+    'subhekabul.com', 'avapress.com', 'khaama.com', 'ariananews.co', 'ariananews.af',
+    'etilaatroz.com', 'salaamtimes.com', 'bakhtarnews.com.af', 'wadsam.com',
+    'afghanistantimes.af', 'afghanpaper.com', 'rawa.org', 'afghanembassy.net',
+    'afghanvoice.ir', 'rahapress.af', 'ansarpress.com', 'jomhornews.com',
+    'da.azadiradio.com', 'pashtoazadiradio.com', 'nunn.asia', 'kabulnow.com',
 )
+# Multi-service broadcasters: only the Afghan-service path counts. bbc.com/persian
+# primarily serves Iran and is deliberately excluded; bbc.com/pashto does not.
+AFGHAN_PATHS = (
+    ('bbc.com', '/pashto'), ('bbc.co.uk', '/pashto'),
+    ('dw.com', '/fa-af'), ('dw.com', '/ps-af'),
+    ('rferl.org', '/afghanistan'), ('voanews.com', '/afghanistan'),
+)
+
+
+def host_matches(host):
+    """True when host equals a known Afghan host or is a subdomain of one."""
+    return any(host == name or host.endswith('.' + name) for name in AFGHAN_HOSTS)
+
+
+def path_matches(host, path):
+    base = host[4:] if host.startswith('www.') else host
+    return any((base == h or base.endswith('.' + h)) and path.startswith(prefix)
+               for h, prefix in AFGHAN_PATHS)
+
+
+def classify(url):
+    """Return exactly one category per document, so nothing is counted twice."""
+    parsed = urlparse(url)
+    host = (parsed.hostname or '').lower()
+    if host.endswith('.af') or host == 'af':
+        return 'af_tld', host
+    if host_matches(host):
+        return 'named_host', host
+    if path_matches(host, parsed.path or ''):
+        return 'named_path', host
+    return 'other', host
 
 
 def main():
@@ -32,63 +67,73 @@ def main():
 
     stream = load_dataset('HuggingFaceFW/fineweb-2', args.config, split='train', streaming=True)
     tld = Counter()
-    hosts = Counter()
-    af_hosts = Counter()
-    named_hosts = Counter()
+    categories = Counter()
+    hosts_by_category = {'af_tld': Counter(), 'named_host': Counter(), 'named_path': Counter()}
     af_chars = other_chars = 0
     af_samples = []
-    seen = 0
+    seen = duplicates = 0
+    fingerprints = set()
     started = time.time()
     for row in stream:
         url = row.get('url') or ''
         text = row.get('text') or ''
         seen += 1
-        host = (urlparse(url).hostname or '').lower()
-        suffix = host.rsplit('.', 1)[-1] if '.' in host else '?'
-        tld[suffix] += 1
-        hosts[host] += 1
-        is_af = suffix == 'af'
-        is_named = any(name in url.lower() for name in AFGHAN_HOSTS)
-        if is_af:
-            af_hosts[host] += 1
-        if is_named:
-            named_hosts[host] += 1
-        if is_af or is_named:
+        category, host = classify(url)
+        tld[host.rsplit('.', 1)[-1] if '.' in host else '?'] += 1
+        categories[category] += 1
+        if category != 'other':
+            hosts_by_category[category][host] += 1
+            # Near-duplicate guard: same host and same opening 300 characters.
+            fingerprint = hashlib.sha256((host + ' ' + ' '.join(text.split())[:300]).encode()).hexdigest()
+            if fingerprint in fingerprints:
+                duplicates += 1
+                continue
+            fingerprints.add(fingerprint)
             af_chars += len(text)
             if len(af_samples) < 12 and len(text) > 500:
-                af_samples.append(dict(url=url[:120], chars=len(text), text=text[:300]))
+                af_samples.append(dict(url=url[:120], category=category, chars=len(text), text=text[:300]))
         else:
             other_chars += len(text)
         if seen >= args.documents:
             break
 
-    af_docs = sum(af_hosts.values())
-    named_docs = sum(named_hosts.values())
-    afghan_docs = af_docs + named_docs
+    af_docs = categories['af_tld']
+    named_docs = categories['named_host'] + categories['named_path']
+    afghan_docs = af_docs + named_docs          # categories are disjoint: no double counting
+    unique_afghan = afghan_docs - duplicates
     body = '\n'.join(s['text'] for s in af_samples)
     share, afghan_markers, iranian_markers, _ = dialect_score(body) if body else (0, 0, 0, [])
     report = dict(
         dataset='HuggingFaceFW/fineweb-2', config=args.config, documents_scanned=seen,
         seconds=round(time.time() - started, 1),
+        method='Each document is classified into exactly one category by hostname (with label boundary) '
+               'or by an Afghan-service path on a multi-service broadcaster. Near-duplicates sharing a '
+               'host and opening 300 characters are counted separately and excluded from the character total.',
         af_tld_documents=af_docs, af_tld_share=round(af_docs / seen, 6),
-        named_afghan_host_documents=named_docs,
+        named_host_documents=categories['named_host'],
+        named_path_documents=categories['named_path'],
         afghan_documents_total=afghan_docs, afghan_share=round(afghan_docs / seen, 6),
+        near_duplicates_excluded=duplicates,
+        unique_afghan_documents=unique_afghan,
+        unique_afghan_share=round(unique_afghan / seen, 6),
         afghan_characters=af_chars, other_characters=other_chars,
         afghan_character_share=round(af_chars / (af_chars + other_chars), 6) if af_chars + other_chars else 0,
         top_tlds=dict(tld.most_common(12)),
-        af_hosts=dict(af_hosts.most_common(15)),
-        named_hosts=dict(named_hosts.most_common(15)),
+        af_hosts=dict(hosts_by_category['af_tld'].most_common(20)),
+        named_hosts=dict(hosts_by_category['named_host'].most_common(20)),
+        named_paths=dict(hosts_by_category['named_path'].most_common(10)),
         dialect_of_afghan_sample=dict(afghan_share=round(share, 4),
                                       afghan_markers=afghan_markers, iranian_markers=iranian_markers,
                                       sample_chars=len(body)),
         projection_full_subset=dict(
-            note='Linear projection of the measured share onto the full 58,887,122-document subset. '
-                 'The stream is not shuffled, so early documents may not be representative.',
-            projected_afghan_documents=round(afghan_docs / seen * 58_887_122),
+            note='Linear projection of the measured unique share onto the full 58,887,122-document subset. '
+                 'The stream is not shuffled, so the head may not be representative.',
+            projected_afghan_documents=round(unique_afghan / seen * 58_887_122),
             projected_afghan_tokens_estimate=round(af_chars / seen * 58_887_122 / 3.3)),
-        limitations='Single unshuffled pass over the head of one config. Domain is a proxy for dialect: '
-                    'an .af site may publish Iranian Persian and an Afghan author may publish on a .com. '
-                    'The named-host list is hand-collected and not exhaustive. No rights review performed.',
+        limitations='Single unshuffled pass over the head of one config. Domain is a proxy for dialect: an '
+                    '.af site may publish Iranian Persian and an Afghan author may publish on a .com. The '
+                    'host list is hand-collected and not exhaustive, so the true yield is likely higher. '
+                    'bbc.com/persian is deliberately excluded as Iran-facing. No rights review performed.',
         samples=af_samples)
     print(json.dumps({k: v for k, v in report.items() if k != 'samples'}, ensure_ascii=False, indent=2))
     args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

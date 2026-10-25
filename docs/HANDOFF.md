@@ -164,8 +164,10 @@ of the data mixture, not of initialisation.
 Headline metric: `transfer_gap = accuracy(English question) − accuracy(Dari question)`, reported beside
 factual correctness and language quality as three separate scores.
 
-**Scale caveat recorded in the plan:** cross-lingual transfer is weak below roughly 1B parameters, so the
-30M pilot tests the pipeline and cannot demonstrate this objective. The required held-out sets
+**Scale caveat, revised 2026-10-25:** an earlier revision stated that transfer requires roughly 1B
+parameters. The second advisor correctly flagged this as an **unverified scaling hypothesis**, and it is
+now recorded as such. A 30M pilot can still yield a measured transfer gap; that measurement should be taken
+and reported with its sample size rather than skipped. The required held-out sets
 (`transfer_qa_dari`, `transfer_qa_pashto`, `transfer_qa_english`, `terminology_probe`) are **NOT BUILT**.
 
 ---

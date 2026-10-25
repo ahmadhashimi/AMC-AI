@@ -1,0 +1,45 @@
+{
+  "held_out_books": [
+    "G1-Dr-Dari.pdf",
+    "G2-Dr-Dari_compressed.pdf",
+    "G5-Dr-Science.pdf",
+    "G5-Dr-Social_Science.pdf",
+    "G6-Dr-Science.pdf",
+    "G6-Dr-Social_Science_2.pdf"
+  ],
+  "evaluation_fingerprints": 578,
+  "training_files": {
+    "data/processed/dari_finetune_v1/train.jsonl": {
+      "rows": 581,
+      "status": "CLEAN",
+      "exact_overlap_with_eval": {},
+      "held_out_books_present": {}
+    },
+    "data/raw/corpus_v1/fineweb_edu.jsonl": {
+      "rows": 25000,
+      "status": "CLEAN",
+      "exact_overlap_with_eval": {},
+      "held_out_books_present": {}
+    },
+    "data/processed/curriculum_clean_v1/pages.jsonl": {
+      "rows": 4119,
+      "status": "SOURCE — contains evaluation pages by design, not a training corpus",
+      "exact_overlap_with_eval": {
+        "dari_heldout": 47,
+        "science_heldout": 387
+      },
+      "held_out_books_present": {
+        "G1-Dr-Dari.pdf": 93,
+        "G2-Dr-Dari_compressed.pdf": 34,
+        "G5-Dr-Science.pdf": 120,
+        "G5-Dr-Social_Science.pdf": 106,
+        "G6-Dr-Science.pdf": 99,
+        "G6-Dr-Social_Science_2.pdf": 102
+      }
+    }
+  },
+  "findings": [],
+  "verdict": "CLEAN — no training corpus contains held-out material",
+  "note": "curriculum_clean_v1 is the SOURCE the evaluation sets were cut from, so it necessarily contains them. It must never be used directly as a training corpus; a training corpus has to be built with the held-out books excluded.",
+  "limitations": "Fingerprint is the first 400 characters after whitespace normalisation. It catches identical and near-identical pages, not paraphrase or partial overlap, and not a document that merely shares a topic."
+}
