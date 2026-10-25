@@ -1,7 +1,9 @@
 # AMC — Technical Handoff
 
 Prepared 2026-10-24 for a second technical advisor (ChatGPT / Codex) joining the project.
-Revision 3 — adds the Afghan-domain measurement and the cross-language knowledge transfer objective.
+Revision 4 — corrected Afghan-domain measurement at 150k documents, a real contamination finding and its
+fix, extraction regression tests, and the human validation report. **GO/HOLD/STOP recommendation: HOLD.**
+Revision 3 added the first Afghan-domain measurement and the cross-language transfer objective.
 Revision 2 added the evaluation and financial safety system.
 Status labels used throughout: **[IMPLEMENTED]** code exists and has been run, **[TESTED]** verified with
 an explicit check or measurement, **[PLANNED]** decided but not built, **[NOT STARTED]**, **[UNKNOWN]**.
@@ -120,40 +122,97 @@ Books excluded from every future training corpus: `G1-Dr-Dari.pdf`, `G2-Dr-Dari_
 Dari perplexity < 100, real-word rate ≥ 95%, **Afghan dialect share > 0.90**, no flagged regression, and a
 native-speaker rubric mean ≥ 2.5 with neither *Afghan register* nor *Factual honesty* below 2.0.
 
-### [TESTED] Afghan-domain measurement — revision 3, the project's most consequential result
+### [TESTED] Contamination audit — a real leak found and fixed (revision 4)
 
-`scripts/research_af_domains.py`, one streaming pass over **30,000 FineWeb-2 `fas_Arab` documents**
-(`docs/research_af_domains.json`):
+`scripts/audit_contamination.py` compares normalised fingerprints (first 400 characters) of every sealed
+evaluation row against each training corpus, and checks for pages from held-out books by name.
 
-| Measurement | Result |
-| --- | --- |
-| `.af` TLD documents | 21 of 30,000 — **0.07%** |
-| **Named Afghan publishers on other TLDs** | **63 — three times more than `.af`** |
-| Afghan documents total | 84 of 30,000 — **0.28%** |
-| Afghan character share | 0.23% |
-| Dialect of the Afghan sample | **83.3% Afghan** (5 Afghan vs 1 Iranian markers, 3,611 chars) |
-| **Linear projection to the full 58,887,122-document subset** | **≈165,000 documents ≈ 165M tokens** |
+**Finding:** `data/processed/dari_finetune_v1/train.jsonl` contained **21 pages of
+`G2-Dr-Dari_compressed.pdf`, a sealed evaluation book.** Cause: that dataset chose its own holdout (first
+four books alphabetically) before the evaluation sets existed, and the two rules disagreed. Any evaluation
+run against it would have been quietly inflated.
 
-Afghan publishers found outside `.af`: `da.azadiradio.com` (36), `bbc.com`, `avapress.com`,
-`afghanpaper.com`, `pajhwok.com`, `ariananews.co`, `khaama.com`, `etilaatroz.com`, `jomhornews.com`,
-`afghanembassy.net`, `dw.com`. Inside `.af`: `tkg.af`, `president.gov.af`, `mod.gov.af`, `mohe.gov.af`,
-`supremecourt.gov.af`, `bakhtarnews.com.af`, `aihrc.org.af`.
+**Fix:** `build_finetune_dataset.py` now reads exclusions from `data/eval/manifest.json` as the single
+source of truth and **refuses to run if the manifest is absent** rather than inventing a split. Rebuilt:
+581 training examples, re-audited **CLEAN**. `fineweb_edu.jsonl` audited **CLEAN**.
+`curriculum_clean_v1/pages.jsonl` is reported as **SOURCE** — it contains evaluation pages by design,
+because they were cut from it, and must never be used directly as a training corpus.
 
-**Why this matters.** The obvious approach — filter on the `.af` TLD — returns 21 documents and would lead
-an engineer to conclude Afghan web text does not exist. **Three quarters of Afghan content is on `.com`.**
+### [TESTED] Extraction regression tests (revision 4)
 
-**What it changes.** Afghan share of a hypothetical 6B-token corpus moves from 0.015% (curriculum only) to
-**2.75%** at 1×, or **≈11%** at the 4× repetition that is standard practice. The step-94,000 model that
-produced Iranian output trained on roughly 0.4% Afghan content.
+`tests/test_extraction.py`, 15 tests, one per defect found in this project, using synthetic character
+streams so no PDF or licensed text is needed. **26 tests pass in total.** Covered: the zero-width-ALEF
+ligature **and the two cases that must not be repaired** (a genuine double ALEF as in نااميد, and a trailing
+zero-width ALEF); form-feed and U+2028 JSONL corruption; kashida stripping; line-edge punctuation; RTL block
+ordering within a y-band including the two-column poem case; contents-page detection; language tagging.
 
-**Confidence — read this before quoting the number.** The projection rests on **84 Afghan documents** from a
-single **unshuffled** pass over the head of one config. The named-publisher list is hand-collected and
-certainly incomplete, so the true yield is likely higher, but the sampling error on 84 documents is wide.
-**This figure is provisional and should be superseded by a 200k–500k document rerun**, not quoted as settled.
+### [IMPLEMENTED] Human validation report — PENDING REVIEW (revision 4)
 
-Domain is also only a proxy for dialect: an `.af` site may publish Iranian Persian, and an Afghan author may
-publish on a `.com`. The 83.3% dialect score on the selected sample supports the proxy but rests on 3,611
-characters.
+`scripts/validate_extraction.py` renders each PDF page beside its extracted text and asks one question:
+does the text read in the same order as the page? Output `data/extracted/validation_v1/validation.html`,
+**48 pages** deliberately weighted to the hard layouts — 12 multi-column/poetry, 8 equations/tables,
+4 exercises, 12 prose, 12 front matter.
+
+Automated flags: 35 pages leading punctuation (the cleaner repairs this), 6 replacement characters,
+1 ZWNJ at a line edge. **Reading order itself cannot be judged automatically and is unreviewed.** The owner
+has previously reported that whole pages read as gibberish while individual lines verify as correct Dari;
+**this report exists to resolve that and has not yet been read.** No page is approved; `approved_for_training`
+is false.
+
+### [IMPLEMENTED] English corpus fetched (revision 4)
+
+`data/raw/corpus_v1/fineweb_edu.jsonl` — 25,000 FineWeb-Edu documents, 125 MB, ODC-BY. For the English
+held-out evaluation set and trilingual tokenizer training. Audited clean of evaluation material.
+The English held-out set itself is **NOT YET BUILT**.
+
+### [TESTED] Afghan-domain measurement — corrected, revision 4
+
+Two runs. The first (`docs/research_af_domains.json`, 30,000 documents) had two defects found by the second
+advisor and confirmed against the data: documents matching both the `.af` list and the named-publisher list
+were **counted twice** (2 documents), and matching was a **substring test against the whole URL**, which
+admitted `bbc.com/persian` — 6 documents from a service that primarily addresses Iran.
+
+The classifier was rewritten: one category per document by **hostname with a label boundary**, Afghan-service
+**paths** handled separately for multi-service broadcasters (`bbc.com/pashto` counts, `bbc.com/persian` does
+not), and near-duplicates detected by host plus opening 300 characters.
+
+`docs/research_af_domains_v2.json`, **150,000 documents, corrected classifier**:
+
+| Measurement | v1 (30k, defective) | **v2 (150k, corrected)** |
+| --- | --- | --- |
+| `.af` TLD documents | 21 (0.07%) | **258 (0.172%)** |
+| Named Afghan hosts | 63 | **328** |
+| Afghan-service broadcaster paths | — | **36** (`dw.com/fa-af`) |
+| Afghan documents total | 84 (0.28%) | **622 (0.4147%)** |
+| Near-duplicates excluded | not measured | **9** (1.4%) |
+| **Unique Afghan documents** | — | **613** |
+| Afghan character share | 0.228% | **0.279%** |
+| Dialect of the selected sample | 83.3% Afghan | **100% Afghan** (5 markers, 0 Iranian) |
+
+**Measured** (what the scan observed): 613 unique Afghan documents in 150,000, a **0.409% unique share**,
+and 100% Afghan dialect on 3,611 characters of sampled text.
+
+**Extrapolated** (not measured): linear projection onto the full 58,887,122-document subset gives
+**≈240,652 documents ≈ 168M tokens**. This assumes the head of the stream represents the whole subset.
+
+Top Afghan sources found: `.af` — `tkg.af` (39), `atlaspress.af` (36), `rahapress.af` (28),
+`ariananews.af` (16), `dailies.gov.af` (10), `aihrc.org.af` (7). Other TLDs — `da.azadiradio.com` (88),
+`avapress.com` (38), `ansarpress.com` (32), `jomhornews.com` (28), `afghanpaper.com` (52 across two hosts).
+
+**Why the corrected number went up rather than down:** the stricter classifier removed false positives, but
+the 5× larger sample surfaced Afghan publishers the first list did not contain. The host list remains
+hand-collected and incomplete, so the true yield is likely **higher** than 168M.
+
+**Remaining sampling risk — unresolved.** Both runs are consecutive passes over the **head of the same
+unshuffled stream**. A larger consecutive sample does not remove positional bias. The second advisor is
+correct that this must be validated against **independently selected shards**, which has **NOT** been done.
+Proposed strategy, not yet executed: read N documents from each of several widely separated shard files of
+`fas_Arab`, compute the Afghan share per shard, and report the between-shard variance alongside the mean. If
+shard shares disagree materially, the single-pass projection is void.
+
+**Precision is also unverified by humans.** A hostname indicates an Afghan publisher; it does not prove a
+given document is Dari. The 100% dialect score rests on 3,611 characters. A human-reviewed sample of
+classified documents is required before the figure is used to size a training budget.
 
 ### [PLANNED] Cross-language knowledge transfer — core objective, added revision 3
 
@@ -401,3 +460,31 @@ has been spent; total RunPod spend remains $0.00.**
 9. **What is NOT known** and should not be guessed: whether the 165M projection survives a larger sample;
    whether page-level line ordering is correct; how weights get off a RunPod pod; whether the Ministry will
    grant redistribution rights; what Qwen3-4B's baseline Dari ability is (never measured).
+
+---
+
+## GO / HOLD / STOP recommendation for the 30M pilot — revision 4
+
+**Recommendation: HOLD.** This agrees with the second advisor independently.
+
+**Not blocking because they are resolved:** evaluation system, budget controls, baseline preservation,
+contamination (found and fixed), regression tests, Afghan-source viability (≈168M tokens, corrected).
+
+**Blocking, in order:**
+1. **Extraction reading order is unverified by a human.** `validation_v1/validation.html` is built and
+   unread. If pages read as badly as the owner reported, the corpus needs rebuilding from sentences rather
+   than pages, which changes the dataset before any training.
+2. **No trilingual tokenizer.** The Persian-only tokenizer costs 2× tokens on Pashto. Training with it
+   wastes the run.
+3. **No GPU benchmark.** The 6–9 hour / $1.30–2.00 estimate extrapolates from 0.63 steps/s measured on a
+   **CPU**. Tokens per second, memory and checkpoint overhead on the intended GPU are **unmeasured**.
+4. **No English held-out set**, so English capability cannot be evaluated at all.
+5. **Afghan-source figure not shard-validated**, so it should not size a training budget yet.
+
+**STOP conditions that would end the from-scratch pilot rather than delay it:** human review finds the
+extraction unusable for the hard layouts and sentence-level rebuilding also fails; or independent shard
+validation shows the Afghan share is materially below 0.1%, which would put reachable Afghan text under
+40M tokens.
+
+**What would turn this into GO:** items 1–4 complete, shard validation consistent with 0.4%, and a measured
+GPU benchmark replacing the extrapolated cost.
