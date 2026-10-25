@@ -13,6 +13,9 @@ ROOT = Path(__file__).resolve().parents[1]
 PDF = ROOT / 'data/raw/afghan_curriculum/dari/grade_03/G3-Dr-Dari.pdf'
 OUT = ROOT / 'data/extracted/afghan_curriculum/dari/grade_03/G3-Dr-Dari_repaired_v1'
 ALEF, LAM = 'ا', 'ل'
+# Form feeds and Unicode line separators appear in PDF text, are junk in training
+# data, and survive json.dumps unescaped to corrupt any splitlines() reader.
+SEPARATORS = str.maketrans({c: '\n' for c in '\x0b\x0c\x1c\x1d\x1e\x85\u2028\u2029'})
 
 
 def repair_line(chars):
@@ -48,6 +51,7 @@ def page_blocks(page):
             chars = [(c['c'], c['bbox'][2] - c['bbox'][0])
                      for span in line['spans'] for c in span['chars']]
             text, count = repair_line(chars)
+            text = text.translate(SEPARATORS)
             repairs += count
             if text.strip():
                 lines.append(text.rstrip())

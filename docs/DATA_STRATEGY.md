@@ -1,6 +1,10 @@
 # What we are building, and how the data gets made
 
-Updated: 2026-10-24. Priority order of languages: **Dari first, Pashto second, English third.**
+Updated: 2026-10-24. Language order: **Dari first, Pashto second, English as the primary additional
+language**, then Afghanistan's other languages as data appears. Working mix until told otherwise:
+roughly 50% Dari/Persian, 25% English, 20% Pashto, 5% other. English earns its share because it is
+unlimited and clean, it transfers sentence structure to the low-resource languages, and it is taught in
+the same Afghan classrooms the model serves.
 
 The model architecture is a commodity — a dense decoder-only Transformer, already written and working. The
 scarce thing, and therefore the project, is **Afghan Dari text at known quality**. Everything below is about
@@ -45,6 +49,15 @@ Each gate is a script that writes a report and sets `approved_for_training: fals
    silently turning the model Iranian.
 3. **Deduplication.** Exact hashing, then near-duplicate detection across sources and against held-out sets.
 4. **Cleanliness.** Boilerplate, navigation, PII, OCR damage, mixed-script junk.
+4b. **Adult content — hard exclusion.** The product teaches Afghan schoolchildren, and sources 2 and 3 are
+   web text, which always carries pornography, erotica and sexual stories. Every web-derived document is
+   screened and anything flagged is **dropped from the corpus, never down-weighted and never trained on**.
+   Implementation: a sexual-content lexicon in Dari, Pashto and English plus domain blocklists for the first
+   pass, then a small classifier trained on the flagged set to catch what the lexicon misses. Curriculum PDFs
+   (source 1) come from the Ministry of Education and do not need this gate, but they still pass through it so
+   one code path covers every source. False positives are cheap here — a wrongly dropped document costs
+   nothing, a wrongly kept one ends up in a child's tutor. Flagged examples are retained **outside** the
+   training corpus, as the labelled set the classifier is measured against.
 5. **Rights.** Per document: URL, publisher, date, licence, permission evidence. Public access is not
    training permission (`docs/DATA_POLICY.md`).
 6. **Human sample review.** A fixed number of documents read per source before that source is approved.

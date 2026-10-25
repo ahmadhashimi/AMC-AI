@@ -268,3 +268,17 @@ right hemistich before the left (`يك جفت كبوتران ابلق` / `است
    others) and 70 replacement characters. Report them, map only what a human confirms against the renders.
 4. Reading order was eyeballed on two pages. Check at least one exercise page, one front-matter page and
    page 62 before approving. Source rights are still unverified; public access is not training permission.
+
+## Licensing decision: open source
+
+The owner has stated the project is **not** to be closed source. This supersedes the earlier "private
+weights" goal recorded at the top of this file.
+
+- Code: MIT, already.
+- Model weights: open (Apache-2.0 or MIT). Trained from random initialisation, so no upstream licence is
+  inherited and nothing needs clearing.
+- Wikipedia-derived text: CC BY-SA, attribution required. FineWeb-2 derived text: ODC-BY, attribution required.
+- **Afghan curriculum books: redistribution rights are unverified.** Public download is not permission to
+  republish. Until the Ministry of Education grants it in writing, we release the **recipe, not the copies**:
+  the extraction scripts, every source URL and every PDF SHA-256, so a third party rebuilds a byte-identical
+  corpus themselves. `scripts/build_curriculum_corpus.py` already records both per book.
