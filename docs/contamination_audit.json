@@ -10,15 +10,21 @@
   "evaluation_fingerprints": 578,
   "training_files": {
     "data/processed/dari_finetune_v1/train.jsonl": {
-      "rows": 581,
+      "rows": 579,
       "status": "CLEAN",
       "exact_overlap_with_eval": {},
+      "paragraph_overlap": {},
+      "near_duplicate_overlap": {},
+      "boilerplate_shingles_ignored": 1805,
       "held_out_books_present": {}
     },
     "data/raw/corpus_v1/fineweb_edu.jsonl": {
       "rows": 25000,
       "status": "CLEAN",
       "exact_overlap_with_eval": {},
+      "paragraph_overlap": {},
+      "near_duplicate_overlap": {},
+      "boilerplate_shingles_ignored": 1739,
       "held_out_books_present": {}
     },
     "data/processed/curriculum_clean_v1/pages.jsonl": {
@@ -28,6 +34,12 @@
         "dari_heldout": 47,
         "science_heldout": 387
       },
+      "paragraph_overlap": {},
+      "near_duplicate_overlap": {
+        "dari_heldout": 2,
+        "science_heldout": 1
+      },
+      "boilerplate_shingles_ignored": 1739,
       "held_out_books_present": {
         "G1-Dr-Dari.pdf": 93,
         "G2-Dr-Dari_compressed.pdf": 34,
